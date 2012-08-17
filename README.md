@@ -1,13 +1,13 @@
 StellarLogger
 =============
 
-A game score logger for [Stellar Impact](www.stellar-impact.com)
+A game score logger for [Stellar Impact](http://www.stellar-impact.com/)
 
 You need to have [WinPcap](http://www.winpcap.org/install/default.htm) installed and running. Once WinPcap is running, simply start and play a Steller Impact game while stellar logger is running in the background.
 
 ![Stellar impact score board](https://raw.github.com/Benny-/StellarLogger/master/img/Score.png)
 
-Stellar logger works on the interface level. It intercepts all incomming packages and uses simple Heuristics (checks the existence of a magic number) to determine if it contains score information from a stellar impact game.
+Stellar logger works on the network interface level. It intercepts all incomming packages and uses simple Heuristics (checks the existence of a magic number) to determine if it contains score information from a stellar impact game.
 
 Before stellar logger can listen for incomming packages, you need to select a interface to listen on. This might be different for every computer. You need to use trial and error to find the good one.
 
