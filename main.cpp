@@ -8,7 +8,7 @@
 
 // Magic value a tcp package starts for the score board.
 u_char StellarMagic[] = {
-'\x10','\x0','\x0','\x0','\x0','\x0','\x0','\x0','\xdd','\x1','\x0','\x0','\x0','\x0','\x0','\x0','\x24','\x0','\x0','\x0','\x0','\x0','\x0','\x0','\xe3','\x1','\x0','\x0',
+'\x10','\x0','\x0','\x0','\x0','\x0','\x0','\x0','\xdd','\x1','\x0','\x0','\x0','\x0','\x0','\x0',
 };
 
 /* 4 bytes IP address */
@@ -45,6 +45,7 @@ typedef struct ip4_header
 void packet_handler(u_char *dumpfile, const struct pcap_pkthdr *header, const u_char *pkt_data);
 bool handleIp4( ip4_header*, u_char** data, u_int* data_len );
 void parseScoreboard(const struct tm* time, u_char* data, u_int data_len);
+void printHex(const u_char* data, SIZE_T len);
 
 pcap_dumper_t *dumpfile = NULL;
 int main(int argc, char *argv[])
@@ -213,36 +214,59 @@ int main(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
+void printHex(const u_char* data, SIZE_T len)
+{
+	printf("0x");
+	for(SIZE_T i = 0; i < len ; i++)
+	{
+		printf(" %02hhX",*( data +i) );
+	}
+	printf("\n");
+}
+
 void parseScoreboard(const struct tm* time, u_char* stellarHeader, u_int stellarData_len)
 {
-	u_char* playerHeader = stellarHeader + 52;
-	u_long playerHeader_len;
+	u_char* playerHeader = stellarHeader + 0x10;
+	SIZE_T playerHeader_len;
 
-	while(playerHeader < (stellarHeader+stellarData_len))
+	// The "playerHeader > stellarHeader" is there to ensure we stop in case the pointer overflows.
+	// This will only happen the data stellarHeader points to is located near the end of the adress space.
+	// This error has not been observed.
+	while(playerHeader < (stellarHeader+stellarData_len) && playerHeader > stellarHeader)
 	{
-		playerHeader_len = *(u_long*)playerHeader;
-		u_char* statPointer = playerHeader;
-		std::cout << "Player header size: " << playerHeader_len << std::endl;
+		u_char* statPointer = playerHeader;			// The stat pointer is a temp adress who goes over every value.
+		playerHeader_len = *(SIZE_T*)statPointer;	// Here you see it used to extract header size.
+		statPointer += 16;							// Now it points to the next value, player team. ect..
 
-		statPointer += 16;
-		std::cout << "Player team: " << * (u_long*) statPointer << std::endl;
-		statPointer += 8;
-		std::cout << "Player kills: " << * (u_int*) statPointer << std::endl;
-		statPointer += 4;
-		std::cout << "Player deaths: " << * (u_int*) statPointer << std::endl;
-		statPointer += 4;
-		std::cout << "Player assists: " << * (u_int*) statPointer << std::endl;
-		statPointer += 4;
-		std::cout << "Player destructions: " << * (u_int*) statPointer << std::endl;
-		statPointer += 4;
-		std::cout << "Player captures: " << * (u_int*) statPointer << std::endl;
-		statPointer += 4;
-		std::cout << "Player escorts destroyed: " << * (u_int*) statPointer << std::endl;
-		statPointer += 4;
+		if(playerHeader_len != 0x48)
+		{
+			std::cout << "Warning, I dont know what to do with player header with this size: " << playerHeader_len << std::endl;
+			std::cout << "Hexidecimal values:" << std::endl;
+			printHex(statPointer,playerHeader_len);
+			std::cout << "Ignoring header" << std::endl;
+			std::cout << std::endl;
+		}
+		else
+		{
+			std::cout << "Player team: " << * (u_long*) statPointer << std::endl;
+			statPointer += 8;
+			std::cout << "Player kills: " << * (u_int*) statPointer << std::endl;
+			statPointer += 4;
+			std::cout << "Player deaths: " << * (u_int*) statPointer << std::endl;
+			statPointer += 4;
+			std::cout << "Player assists: " << * (u_int*) statPointer << std::endl;
+			statPointer += 4;
+			std::cout << "Player destructions: " << * (u_int*) statPointer << std::endl;
+			statPointer += 4;
+			std::cout << "Player captures: " << * (u_int*) statPointer << std::endl;
+			statPointer += 4;
+			std::cout << "Player escorts destroyed: " << * (u_int*) statPointer << std::endl;
+			statPointer += 4;
 
-		statPointer += 4; // 4 empty bytes.
-		std::cout << "Player name: " << statPointer << std::endl;
-		std::cout << std::endl;
+			statPointer += 4; // 4 empty bytes. Padding?
+			std::cout << "Player name: " << statPointer << std::endl;
+			std::cout << std::endl;
+		}
 
 		playerHeader = playerHeader + playerHeader_len; // Go to next player's score.
 	}
@@ -285,12 +309,7 @@ bool handleIp4( ip4_header* ip4h, u_char** data, u_int* data_len )
 			printf("tcp4 len (bytes): %u\n",tcp_len);
 			printf("data len (bytes): %u\n",*data_len);
 
-			printf("0x");
-			for(u_int i = 0; i < *data_len ; i++)
-			{
-				printf(" %02hhX",*( (*data) +i) );
-			}
-			printf("\n");
+			printHex(*data, *data_len);
 
 			printf("\n");
 			return true;
