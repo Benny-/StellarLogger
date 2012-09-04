@@ -3,6 +3,8 @@ StellarLogger
 
 A game score logger for [Stellar Impact](http://www.stellar-impact.com/)
 
+You need to have [WinPcap](http://www.winpcap.org/install/default.htm) and [VS10 C++ Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=5555) installed before you are able to run this application.
+
 You need to have [WinPcap](http://www.winpcap.org/install/default.htm) installed and running. Once WinPcap is running, simply start and play a Steller Impact game while stellar logger is running in the background.
 
 ![Stellar impact score board](https://raw.github.com/Benny-/StellarLogger/master/img/Score.png)
