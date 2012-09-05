@@ -8,7 +8,7 @@
 
 // Magic value a tcp package starts for the score board.
 u_char StellarMagic[] = {
-'\x10','\x0','\x0','\x0','\x0','\x0','\x0','\x0','\xdd','\x1','\x0','\x0','\x0','\x0','\x0','\x0',
+'\x10','\x0','\x0','\x0','\x0','\x0','\x0','\x0','\xdd','\x1','\x0','\x0',
 };
 
 /* 4 bytes IP address */
