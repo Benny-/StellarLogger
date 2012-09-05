@@ -1,0 +1,40 @@
+Stellar impact sends packets over TCP (And previously over UDP, as described on the forum). The packets never seem to be segmented. This document describes the layout of a packet which contains score information from a played game.
+
+long	== 8 bytes.
+int	== 4 bytes.
+short	== 2 bytes.
+
+Header (16 bytes):
+
+10 00 00 00 00 00 00 00 <12 bytes, seems to be constant.>
+DD 01 00 00 00 00 00 00 <Part of constant> <int, practice flag (It is zero here)>
+
+Once the constant size header is done, the player headers wil start. The first long is most likely the size.
+
+Score from Viollini (72 bytes):
+
+48 00 00 00 00 00 00 00 <long? byte size for this package (Its always 0x48 (72 in decimal). But players with long names may have more bytes(?) )>
+E2 01 00 00 2A 82 00 00 <int?>             <int?>
+02 00 00 00 00 00 00 00 <long Team>
+0A 00 00 00 0A 00 00 00 <int kills>        <int deaths>
+15 00 00 00 11 00 00 00 <int assists>      <int destructions>
+06 00 00 00 5F 00 00 00 <int captures>     <int escorts destroyed>
+00 00 00 00 56 69 6F 6C <short, padding?>  <string (20 bytes?) playername (Padded with null terminators)>
+6C 69 6E 69 00 00 00 00
+00 00 00 00 00 00 00 00
+
+Score from wth (72 bytes):
+
+48 00 00 00 00 00 00 00
+E2 01 00 00 97 8E 00 00
+02 00 00 00 00 00 00 00
+0B 00 00 00 0F 00 00 00
+14 00 00 00 14 00 00 00
+06 00 00 00 62 00 00 00
+00 00 00 00 77 74 68 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+
+The player header from the other players have been removed.
+
+Often, there will be a player header who's size is not 72 bytes. This is in addition to all expected player headers. I dont know yet what its content represent.
